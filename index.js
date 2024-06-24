@@ -323,7 +323,7 @@ app.post('/api/downloadcase-studies', async(req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.send('hello world')
+    res.send('Your server is runing on......')
 
 })
 
