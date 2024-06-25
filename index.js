@@ -12,11 +12,14 @@ const secretKey = process.env.SECRETE_KEY;
 // const port = process.env.PORT;
 
 
-app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-}));
+const corsOptions = {
+    origin: '*', // Allow all origins for demo purposes
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true // Allow cookies and other credentials
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(fileUpload());
@@ -149,42 +152,50 @@ app.delete("/api/deleteContact/:id", (req, res) => {
 });
 
 // User APIs
-app.post("/api/register", (req, res) => {
+app.post("/api/register", async(req, res) => {
     const { firstName, lastName, email, password, phone, role } = req.body;
 
-    if (!firstName || !lastName || !email || !password || !phone || !role) {
-        return res.status(400).send("All fields are required.");
-    }
-
-    const entryData = { firstName, lastName, email, password, phone, role };
-
-    db.addUser(entryData, (err, result) => {
-        if (err) {
-            return res.status(500).send("Error registering user.");
+    try {
+        if (!firstName || !lastName || !email || !password || !phone || !role) {
+            return res.status(400).send("All fields are required.");
         }
 
-        const token = jwt.sign({ email: email, name: `${firstName} ${lastName}` }, secretKey, { expiresIn: "1h" });
-        res.status(201).json({ message: "User registered successfully.", token, name: `${firstName} ${lastName}` });
-    });
+        const entryData = { firstName, lastName, email, password, phone, role };
+
+        const newUser = await db.addUser(entryData);
+
+        const token = jwt.sign({ email: newUser.email, name: `${newUser.firstName} ${newUser.lastName}` }, secretKey, { expiresIn: "1h" });
+
+        res.status(201).json({ message: "User registered successfully.", token, name: `${newUser.firstName} ${newUser.lastName}` });
+
+    } catch (error) {
+        console.error("Error registering user:", error);
+        res.status(500).send("Error registering user.");
+    }
 });
 
-app.post("/api/login", (req, res) => {
+
+app.post("/api/login", async(req, res) => {
     const { email, password } = req.body;
 
-    db.loginUser(email, password, (err, result) => {
-        if (err) {
-            res.status(500).json({ message: "Error logging in user." });
-        } else {
-            if (result.length > 0) {
-                const user = result[0];
-                const token = jwt.sign({ email: email, name: `${user.firstName} ${user.lastName}` }, secretKey, { expiresIn: "1h" });
-                res.status(200).json({ message: "User logged in successfully.", token, name: `${user.firstName} ${user.lastName}` });
-            } else {
-                res.status(401).json({ message: "User Not Logined In." });
-            }
+    try {
+        console.log(`Login attempt with email: ${email}`); // Log the email for debugging
+
+        const user = await db.loginUser(email, password);
+
+        if (!user) {
+            return res.status(401).json({ message: "User not found or incorrect credentials." });
         }
-    });
+
+        const token = jwt.sign({ email: user.email, name: `${user.firstName} ${user.lastName}` }, secretKey, { expiresIn: "1h" });
+
+        res.status(200).json({ message: "User logged in successfully.", token, name: `${user.firstName} ${user.lastName}` });
+    } catch (error) {
+        console.error("Error logging in user:", error);
+        res.status(500).json({ message: "Internal Server Error. Please try again later." });
+    }
 });
+
 
 app.put("/api/updateUser/:id", (req, res) => {
     const userId = req.params.id;

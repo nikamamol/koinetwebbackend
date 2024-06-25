@@ -39,9 +39,13 @@ const BlogPost = mongoose.model('BlogPost', blogPostSchema);
 
 // User Schema
 const userSchema = new mongoose.Schema({
-    name: String,
+
+    firstName: String,
+    lastName: String,
     email: String,
     password: String,
+    role: String,
+    phone: String,
     date: { type: Date, default: Date.now }
 });
 
@@ -73,7 +77,16 @@ const addContactFormEntry = async(entryData) => {
     return newEntry.save();
 };
 
-
+// Register a user
+const addUser = async(userData) => {
+    try {
+        const newUser = new User(userData);
+        await newUser.save();
+        return newUser;
+    } catch (error) {
+        throw error;
+    }
+};
 
 // Add a blog post
 const addBlogPost = (title, category, content, imageUrl) => {
@@ -115,27 +128,15 @@ const updateBlogPost = (data, callback) => {
     });
 };
 
-// Register a user
-const addUser = (userData, callback) => {
-    const newUser = new User(userData);
-    newUser.save((err, result) => {
-        if (err) {
-            callback(err, null);
-        } else {
-            callback(null, result);
-        }
-    });
-};
 
 // Login a user
-const loginUser = (email, password, callback) => {
-    User.findOne({ email, password }, (err, result) => {
-        if (err) {
-            callback(err, null);
-        } else {
-            callback(null, result);
-        }
-    });
+const loginUser = async(email, password) => {
+    try {
+        const user = await User.findOne({ email, password }).exec();
+        return user; // Return the user object if found
+    } catch (error) {
+        throw error; // Throw an error if findOne fails
+    }
 };
 
 // Add email record
