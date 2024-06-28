@@ -21,7 +21,7 @@ const contactFormSchema = new mongoose.Schema({
     message: { type: String, required: true },
     phone: { type: String, required: true },
     companyName: { type: String, required: true },
-    country: { type: String, required: true },
+    countryCode: { type: String, required: true },
     date: { type: Date, default: Date.now }
 });
 
