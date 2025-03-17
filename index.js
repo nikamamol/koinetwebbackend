@@ -103,6 +103,148 @@ app.delete("/api/deleteBlog/:id", (req, res) => {
     });
 });
 
+
+// infographics
+app.post('/api/addinfographics', async(req, res) => {
+    const { title, category, content, imageUrl } = req.body;
+    // Check if all required fields are provided
+    if (!title || !category || !content) {
+        return res.status(400).json({ error: 'Title, category, and content are required' });
+    }
+
+    try {
+        const result = await db.addInfographics(title, category, content, imageUrl);
+        res.status(200).json({ message: 'Infographics created successfully', post: result });
+    } catch (err) {
+        console.error('Error inserting infographics post:', err);
+        res.status(500).json({ error: 'Error inserting infographics post' });
+    }
+});
+
+// get all infographics
+app.get('/api/getinfographics', async(req, res) => {
+    try {
+        const blogPosts = await db.getAllInfographics();
+        res.status(200).json(blogPosts);
+    } catch (err) {
+        console.error('Error fetching infographics posts:', err);
+        res.status(500).json({ error: 'Error fetching infographics posts' });
+    }
+});
+
+// get blogpost with id
+app.get('/api/infographics/:id', async(req, res) => {
+    const blogId = req.params.id;
+    try {
+        const blogPost = await db.getInfographicsById(blogId);
+        if (!blogPost) {
+            res.status(404).json({ error: 'Infographics not found' });
+        } else {
+            res.status(200).json(blogPost);
+        }
+    } catch (err) {
+        console.error('Error retrieving infographics:', err);
+        res.status(500).json({ error: 'Error retrieving infographics' });
+    }
+});
+
+app.put("/api/updateBlog/:id", (req, res) => {
+    const data = {
+        id: req.params.id,
+        title: req.body.title,
+        content: req.body.content,
+        author: req.body.author,
+        imagePath: req.body.imagePath
+    };
+
+    db.updateinfographics(data, (err, result) => {
+        if (err) {
+            console.error("Error updating blog post:", err);
+            res.status(500).send("Error updating blog post");
+        } else {
+            res.status(200).send("Blog post updated successfully");
+        }
+    });
+});
+
+// app.delete("/api/deleteinfographics/:id", (req, res) => {
+//     const blogId = req.params.id;
+
+//     db.deleteBlogPost(blogId, (err, result) => {
+//         if (err) {
+//             console.error("Error deleting infographics:", err);
+//             res.status(500).send("Error deleting infographics");
+//         } else {
+//             res.status(200).send("Infographics deleted successfully");
+//         }
+//     });
+// });
+// *****************************************************articles********************************************************
+
+// infographics
+app.post('/api/addarticles', async(req, res) => {
+    const { title, category, content, imageUrl } = req.body;
+    // Check if all required fields are provided
+    if (!title || !category || !content) {
+        return res.status(400).json({ error: 'Title, category, and content are required' });
+    }
+
+    try {
+        const result = await db.addArticles(title, category, content, imageUrl);
+        res.status(200).json({ message: 'Articles created successfully', post: result });
+    } catch (err) {
+        console.error('Error inserting articles post:', err);
+        res.status(500).json({ error: 'Error inserting articles post' });
+    }
+});
+
+// get all infographics
+app.get('/api/getarticles', async(req, res) => {
+    try {
+        const blogPosts = await db.getAlladdArticles();
+        res.status(200).json(blogPosts);
+    } catch (err) {
+        console.error('Error fetching articles posts:', err);
+        res.status(500).json({ error: 'Error fetching articles posts' });
+    }
+});
+
+// get blogpost with id
+app.get('/api/articles/:id', async(req, res) => {
+    const blogId = req.params.id;
+    try {
+        const blogPost = await db.getaddArticlesById(blogId);
+        if (!blogPost) {
+            res.status(404).json({ error: 'Articles not found' });
+        } else {
+            res.status(200).json(blogPost);
+        }
+    } catch (err) {
+        console.error('Error retrieving articles:', err);
+        res.status(500).json({ error: 'Error retrieving articles' });
+    }
+});
+
+app.put("/api/updateArticles/:id", (req, res) => {
+    const data = {
+        id: req.params.id,
+        title: req.body.title,
+        content: req.body.content,
+        author: req.body.author,
+        imagePath: req.body.imagePath
+    };
+
+    db.updateaddArticles(data, (err, result) => {
+        if (err) {
+            console.error("Error updating blog post:", err);
+            res.status(500).send("Error updating blog post");
+        } else {
+            res.status(200).send("Articles updated successfully");
+        }
+    });
+});
+
+// **********************************************************************************************************************
 // Contact APIs
 app.get("/api/getContact", (req, res) => {
     db.getAllContactFormEntries((err, entries) => {
@@ -114,16 +256,45 @@ app.get("/api/getContact", (req, res) => {
     });
 });
 
-app.post("/api/postContact", async(req, res) => {
+app.post('/api/postContact', async(req, res) => {
     try {
-        const entryData = req.body;
-        const result = await db.addContactFormEntry(entryData);
+        const { name, email, phone, companyName, message, countryCode } = req.body;
 
-        res.status(201).send("Thank you!");
-    } catch (err) {
-        res.status(500).send(err.message);
+        // Nodemailer Configuration
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER, // Your email
+                pass: process.env.EMAIL_PASS // Your email password or app password
+            }
+        });
+
+        // Email Content
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: "amolspatil018@gmail.com", // Change this to your receiving email
+            subject: `Proposal Request from ${name} - ${companyName}`,
+            html: `
+                <h3>Proposal Request from ${name} - ${companyName}</h3>
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Phone:</strong> ${countryCode} ${phone}</p>
+                <p><strong>Company:</strong> ${companyName}</p>
+                <p><strong>Message:</strong></p>
+                <p>${message}</p>
+            `
+        };
+
+        // Send Email
+        await transporter.sendMail(mailOptions);
+        res.status(201).json({ message: "Email sent successfully!" });
+
+    } catch (error) {
+        console.error("Error sending email:", error);
+        res.status(500).json({ error: "Failed to send email" });
     }
 });
+
 
 
 app.put("/api/updateContact/:id", (req, res) => {

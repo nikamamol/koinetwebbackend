@@ -39,6 +39,31 @@ const blogPostSchema = new mongoose.Schema({
 
 const BlogPost = mongoose.model('BlogPost', blogPostSchema);
 
+// infographics Schema
+const infographicsSchema = new mongoose.Schema({
+    title: String,
+    category: String,
+    content: String,
+    imageUrl: String,
+    author: String,
+    date: { type: Date, default: Date.now }
+});
+
+const infographics = mongoose.model('Infographics', infographicsSchema);
+
+
+// articles Schema
+const articalesSchema = new mongoose.Schema({
+    title: String,
+    category: String,
+    content: String,
+    imageUrl: String,
+    author: String,
+    date: { type: Date, default: Date.now }
+});
+
+const articles = mongoose.model('Articles', articalesSchema);
+
 // User Schema
 const userSchema = new mongoose.Schema({
 
@@ -112,7 +137,6 @@ const getAllBlogPosts = () => {
         });
 };
 
-
 // Get a blog post by ID
 const getBlogPostById = (id) => {
     return BlogPost.findById(id).exec(); // Return a promise using .exec() to ensure promise is returned
@@ -130,7 +154,90 @@ const updateBlogPost = (data, callback) => {
     });
 };
 
+// ***************************************
+// Add a infographics
+const addInfographics = (title, category, content, imageUrl) => {
+    const blogPost = new infographics({ title, category, content, imageUrl });
+    return blogPost.save()
+        .then(result => {
+            return result; // Return the saved document if successful
+        })
+        .catch(err => {
+            throw err; // Throw error if save operation fails
+        });
+};
 
+const getAllInfographics = () => {
+    return infographics.find() // Assuming BlogPost is your Mongoose model
+        .then(posts => {
+            return posts; // Return array of blog posts
+        })
+        .catch(err => {
+            throw err; // Throw error if retrieval fails
+        });
+};
+
+// Get a blog post by ID
+const getInfographicsById = (id) => {
+    return infographics.findById(id).exec(); // Return a promise using .exec() to ensure promise is returned
+};
+
+// Update a blog post
+const updateinfographics = (data, callback) => {
+    const { id, title, content, author, imagePath } = data;
+    infographics.findByIdAndUpdate(id, { title, content, author, imagePath }, { new: true }, (err, result) => {
+        if (err) {
+            callback(err, null);
+        } else {
+            callback(null, result);
+        }
+    });
+};
+
+
+// ******************************
+
+// *********************************Articles*******************************
+// Add a infographics
+const addArticles = (title, category, content, imageUrl) => {
+    const blogPost = new articles({ title, category, content, imageUrl });
+    return blogPost.save()
+        .then(result => {
+            return result; // Return the saved document if successful
+        })
+        .catch(err => {
+            throw err; // Throw error if save operation fails
+        });
+};
+
+const getAlladdArticles = () => {
+    return articles.find() // Assuming BlogPost is your Mongoose model
+        .then(posts => {
+            return posts; // Return array of blog posts
+        })
+        .catch(err => {
+            throw err; // Throw error if retrieval fails
+        });
+};
+
+// Get a blog post by ID
+const getaddArticlesById = (id) => {
+    return articles.findById(id).exec(); // Return a promise using .exec() to ensure promise is returned
+};
+
+// Update a blog post
+const updateaddArticles = (data, callback) => {
+    const { id, title, content, author, imagePath } = data;
+    articles.findByIdAndUpdate(id, { title, content, author, imagePath }, { new: true }, (err, result) => {
+        if (err) {
+            callback(err, null);
+        } else {
+            callback(null, result);
+        }
+    });
+};
+
+// *******************************************************************************************************************
 // Login a user
 const loginUser = async(email, password) => {
     try {
@@ -164,4 +271,14 @@ module.exports = {
     addUser,
     loginUser,
     addEmailRecord,
+
+    addInfographics,
+    getAllInfographics,
+    getInfographicsById,
+    updateinfographics,
+
+    addArticles,
+    getAlladdArticles,
+    updateaddArticles,
+    getaddArticlesById
 };
