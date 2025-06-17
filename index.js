@@ -272,7 +272,7 @@ app.post('/api/postContact', async(req, res) => {
         // Email Content
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: "amolspatil018@gmail.com", // Change this to your receiving email
+            to: "koinetmediaites@gmail.com", // Change this to your receiving email
             subject: `Proposal Request from ${name} - ${companyName}`,
             html: `
                 <h3>Proposal Request from ${name} - ${companyName}</h3>
@@ -400,14 +400,14 @@ app.post('/api/send-email', async(req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: process.env.MAIL_USER,
-            pass: process.env.MAIL_PASSWORD
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         }
     });
 
     const mailOptions = {
         from: email,
-        to: process.env.MAIL_TO,
+        to: "amolspatil018@gmail.com",
         subject: `New Signup from ${email}`,
         text: `You have a new signup with the email: ${email}`
     };
