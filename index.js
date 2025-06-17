@@ -272,7 +272,7 @@ app.post('/api/postContact', async(req, res) => {
         // Email Content
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: "koinetmediaites@gmail.com", // Change this to your receiving email
+            to: "amolspatil018@gmail.com", // Change this to your receiving email
             subject: `Proposal Request from ${name} - ${companyName}`,
             html: `
                 <h3>Proposal Request from ${name} - ${companyName}</h3>
